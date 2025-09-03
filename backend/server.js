@@ -24,13 +24,13 @@ app.get('/api/data', async (req, res) => {
     try {
         const db = getDB();
         const themes = await db.collection('themes').find({}).toArray().then(docs => docs.map(doc => ({
-            id: doc.id || (doc._id ? doc._id.toString() : null), // Use existing id or _id as id, handle undefined _id
+            id: doc.id || (doc._id ? String(doc._id) : null), // Use existing id or _id as id, handle undefined _id, ensure string conversion
             Nom: doc.name, // Map 'name' to 'Nom'
             description: doc.description || ''
         })));
         const systemesOrganes = await db.collection('systemesOrganes').find({ Nom: { $exists: true, $ne: null } }).sort({ Nom: 1 }).toArray().then(docs => docs.map(doc => ({
             ...doc,
-            id: doc.id || (doc._id ? doc._id.toString() : null) // Ensure 'id' field is present and consistent, handle undefined _id
+            id: doc.id || (doc._id ? String(doc._id) : null) // Ensure 'id' field is present and consistent, handle undefined _id, ensure string conversion
         })));
 
         // Create maps for quick lookup
