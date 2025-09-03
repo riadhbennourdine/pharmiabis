@@ -29,9 +29,16 @@ app.get('/api/data', async (req, res) => {
             description: doc.description || ''
         })));
         const systemesOrganes = await db.collection('systemesOrganes').find({ Nom: { $exists: true, $ne: null } }).sort({ Nom: 1 }).toArray();
+
+        // Create maps for quick lookup
+        const themeMap = new Map(themes.map(t => [t.id, t]));
+        const systemeOrganeMap = new Map(systemesOrganes.map(s => [s.id, s]));
+
         const memofiches = await db.collection('memofiches').find({}).sort({ createdAt: -1 }).toArray().then(docs => docs.map(doc => ({
             ...doc,
-            id: doc._id.toString() // Map _id to id
+            id: doc._id.toString(), // Map _id to id
+            theme: themeMap.get(doc.theme) || null, // Embed full theme object
+            systeme_organe: systemeOrganeMap.get(doc.systemeOrgane) || null // Embed full systeme_organe object
         })));
         res.status(200).json({ themes, systemesOrganes, memofiches });
     } catch (error) {
