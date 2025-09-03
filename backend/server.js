@@ -21,8 +21,8 @@ app.use('/api', (req, res, next) => {
 app.get('/api/data', async (req, res) => {
     try {
         const db = getDB();
-        const themes = await db.collection('themes').find({}).sort({ Nom: 1 }).toArray();
-        const systemesOrganes = await db.collection('systemesOrganes').find({}).sort({ Nom: 1 }).toArray();
+        const themes = await db.collection('themes').find({ Nom: { $exists: true, $ne: null } }).sort({ Nom: 1 }).toArray();
+        const systemesOrganes = await db.collection('systemesOrganes').find({ Nom: { $exists: true, $ne: null } }).sort({ Nom: 1 }).toArray();
         const memofiches = await db.collection('memofiches').find({}).sort({ createdAt: -1 }).toArray();
         res.status(200).json({ themes, systemesOrganes, memofiches });
     } catch (error) {
