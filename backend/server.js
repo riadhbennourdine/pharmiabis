@@ -23,7 +23,11 @@ app.use('/api', (req, res, next) => {
 app.get('/api/data', async (req, res) => {
     try {
         const db = getDB();
-        const themes = await db.collection('themes').find({}).toArray();
+        const themes = await db.collection('themes').find({}).toArray().then(docs => docs.map(doc => ({
+            id: doc.id || doc._id.toString(), // Use existing id or _id as id
+            Nom: doc.name, // Map 'name' to 'Nom'
+            description: doc.description || ''
+        })));
         const systemesOrganes = await db.collection('systemesOrganes').find({ Nom: { $exists: true, $ne: null } }).sort({ Nom: 1 }).toArray();
         const memofiches = await db.collection('memofiches').find({}).sort({ createdAt: -1 }).toArray();
         res.status(200).json({ themes, systemesOrganes, memofiches });
