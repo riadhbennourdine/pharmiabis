@@ -28,7 +28,10 @@ app.get('/api/data', async (req, res) => {
             Nom: doc.name, // Map 'name' to 'Nom'
             description: doc.description || ''
         })));
-        const systemesOrganes = await db.collection('systemesOrganes').find({ Nom: { $exists: true, $ne: null } }).sort({ Nom: 1 }).toArray();
+        const systemesOrganes = await db.collection('systemesOrganes').find({ Nom: { $exists: true, $ne: null } }).sort({ Nom: 1 }).toArray().then(docs => docs.map(doc => ({
+            ...doc,
+            id: doc.id || doc._id.toString() // Ensure 'id' field is present and consistent
+        })));
 
         // Create maps for quick lookup
         const themeMap = new Map(themes.map(t => [t.id, t]));
