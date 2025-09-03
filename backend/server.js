@@ -39,7 +39,7 @@ app.get('/api/data', async (req, res) => {
 
         const memofiches = await db.collection('memofiches').find({}).sort({ createdAt: -1 }).toArray().then(docs => docs.map(doc => ({
             ...doc,
-            id: doc._id.toString(), // Map _id to id
+            id: doc._id ? doc._id.toString() : null, // Map _id to id, handle undefined _id
             theme: doc.theme ? themeMap.get(doc.theme) : null, // Embed full theme object if doc.theme exists
             systeme_organe: doc.systemeOrgane ? systemeOrganeMap.get(doc.systemeOrgane) : null // Embed full systeme_organe object if doc.systemeOrgane exists
         })));
