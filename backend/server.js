@@ -29,7 +29,10 @@ app.get('/api/data', async (req, res) => {
             description: doc.description || ''
         })));
         const systemesOrganes = await db.collection('systemesOrganes').find({ Nom: { $exists: true, $ne: null } }).sort({ Nom: 1 }).toArray();
-        const memofiches = await db.collection('memofiches').find({}).sort({ createdAt: -1 }).toArray();
+        const memofiches = await db.collection('memofiches').find({}).sort({ createdAt: -1 }).toArray().then(docs => docs.map(doc => ({
+            ...doc,
+            id: doc._id.toString() // Map _id to id
+        })));
         res.status(200).json({ themes, systemesOrganes, memofiches });
     } catch (error) {
         console.error("Error fetching data:", error);
