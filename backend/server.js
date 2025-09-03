@@ -34,8 +34,8 @@ app.get('/api/data', async (req, res) => {
         })));
 
         // Create maps for quick lookup
-        const themeMap = new Map(themes.map(t => [t.id, t]));
-        const systemeOrganeMap = new Map(systemesOrganes.map(s => [s.id, s]));
+        const themeMap = new Map(themes.map(t => [t._id.toString(), t])); // Use _id as key
+        const systemeOrganeMap = new Map(systemesOrganes.map(s => [s._id.toString(), s])); // Use _id as key
 
         const memofiches = await db.collection('memofiches').find({}).sort({ createdAt: -1 }).toArray().then(docs => docs.map(doc => ({
             ...doc,
