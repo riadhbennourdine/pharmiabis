@@ -46,7 +46,7 @@ app.get('/api/data', async (req, res) => {
         res.status(200).json({ themes, systemesOrganes, memofiches });
     } catch (error) {
         console.error("Error fetching data:", error);
-        res.status(500).json({ message: 'Error fetching data', error: error.toString() });
+        res.status(500).json({ message: 'Error fetching data', error: 'An unexpected server error occurred.' });
     }
 });
 
