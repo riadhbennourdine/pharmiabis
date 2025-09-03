@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Set a limit to prevent large payloads
 
 // Serve static files from the project root
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..', 'dist')));
 
 
 // API Routes
@@ -89,7 +89,7 @@ app.delete('/api/memofiches/:id', async (req, res) => {
 // The "catchall" handler: for any request that doesn't match an API route,
 // send back React's index.html file.
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../index.html'));
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 
