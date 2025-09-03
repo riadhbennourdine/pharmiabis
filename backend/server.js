@@ -11,6 +11,12 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Set a limit to prevent large payloads
 
+// Disable caching for API routes
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
 // API Routes
 app.get('/api/data', async (req, res) => {
     try {
