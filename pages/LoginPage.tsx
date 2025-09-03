@@ -1,13 +1,42 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { LogoIcon } from '../components/icons';
+import { useAuth } from '../App'; // Import useAuth
 
 const LoginPage: React.FC = () => {
-    const handleSubmit = (event: React.FormEvent) => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const { login } = useAuth(); // Use the login function from AuthContext
+    const navigate = useNavigate(); // For navigation after login
+
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        // Authentication logic would go here
-        alert('Fonctionnalité de connexion non implémentée.');
+        setError(null); // Clear previous errors
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Login failed');
+            }
+
+            login(data.token); // Store the token and update auth state
+            navigate('/fiches'); // Redirect to fiches page
+
+        } catch (err: any) {
+            console.error('Login error:', err);
+            setError(err.message || 'An unexpected error occurred.');
+        }
     };
 
     return (
@@ -28,6 +57,12 @@ const LoginPage: React.FC = () => {
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                    {error && (
+                        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
+                            <p className="font-bold">Erreur de connexion</p>
+                            <p>{error}</p>
+                        </div>
+                    )}
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="username" className="sr-only">Nom d'utilisateur ou e-mail</label>
@@ -39,6 +74,8 @@ const LoginPage: React.FC = () => {
                                 required
                                 className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                                 placeholder="Nom d'utilisateur ou e-mail"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                             />
                         </div>
                         <div>
@@ -51,6 +88,8 @@ const LoginPage: React.FC = () => {
                                 required
                                 className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                                 placeholder="Mot de passe"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
                     </div>

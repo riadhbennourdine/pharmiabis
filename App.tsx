@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import { PharmIaData, MemoFiche } from './types';
 import HomePage from './pages/HomePage';
@@ -12,6 +12,42 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { INITIAL_DATA } from './data/initialData';
 import { getAllData, addMemoFicheToServer, deleteMemoFicheFromServer } from './services/apiService';
 import { DataContext } from './contexts/DataContext';
+
+interface AuthContextType {
+  isLoggedIn: boolean;
+  login: (token: string) => void;
+  logout: () => void;
+}
+
+export const AuthContext = createContext<AuthContextType | null>(null);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem('token'));
+
+  const login = (token: string) => {
+    localStorage.setItem('token', token);
+    setIsLoggedIn(true);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+  };
+
+  return (
+    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 const CACHE_KEY = 'pharmIaData';
 
@@ -131,26 +167,28 @@ const App: React.FC = () => {
 
   return (
     <DataContext.Provider value={{ data, loading, error, getMemoFicheById, addMemoFiche, deleteMemoFiche }}>
-      <BrowserRouter>
-        <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
-          <Header />
-          <main>
-             {error && (
-                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 container mx-auto my-4 rounded-md">
-                    <p className="font-bold">Avertissement</p>
-                    <p>{error}</p>
-                </div>
-            )}
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/fiches" element={<FichesPage />} />
-              <Route path="/fiches/:id" element={<MemoFicheDetailWrapper />} />
-              <Route path="/generateur" element={<GeneratorPage />} />
-              <Route path="/connexion" element={<LoginPage />} />
-            </Routes>
-          </main>
-        </div>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
+            <Header />
+            <main>
+               {error && (
+                  <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 container mx-auto my-4 rounded-md">
+                      <p className="font-bold">Avertissement</p>
+                      <p>{error}</p>
+                  </div>
+              )}
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/fiches" element={<FichesPage />} />
+                <Route path="/fiches/:id" element={<MemoFicheDetailWrapper />} />
+                <Route path="/generateur" element={<GeneratorPage />} />
+                <Route path="/connexion" element={<LoginPage />} />
+              </Routes>
+            </main>
+          </div>
+        </BrowserRouter>
+      </AuthProvider>
     </DataContext.Provider>
   );
 };
